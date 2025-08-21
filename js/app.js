@@ -11,7 +11,7 @@ const firebaseConfig = {
   
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+  const database = firebase.database();
 
   //Dom Element
   const movieForm = document.getElementById('movieForm');
@@ -37,6 +37,8 @@ const firebaseConfig = {
 
   //initialize the app
   function init(){
+    movieForm.addEventListener('submit',handleFormSubmit);
+    
     stars.forEach(star =>{
            star.addEventListener('click',handleStarClick);
            star.addEventListener('mouseover',handleStarHover);
@@ -60,6 +62,32 @@ const firebaseConfig = {
         alert('Please enter a movie title');
         return;
       }
+      const movieData = {
+        title,
+        year:year || null,
+        director:director || null,
+        genre,
+        status,
+        rating:rating ? parseInt(rating): 0,
+        notes:notes || null,
+        createdAt:firebase.database.ServerValue.TIMESTAMP,
+        updatedAt:firebase.database.ServerValue.TIMESTAMP,
+        
+      };
+
+    database.ref('movies').push(movieData)
+    .then(()=>{
+      showAlert('Movie added successfully','success');
+      movieForm.reset();
+    })
+    .catch(error=>{
+      showAlert('Error in Adding movie'+error.message,'error');
+    });
+  }
+  //helping function
+  function showAlert(message, type){
+    alert(`${type.toUpperCase()}: ${message}`)
+   
   }
 
   //star rating functionalities
