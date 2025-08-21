@@ -108,6 +108,37 @@ const firebaseConfig = {
            totalMovies.textContent = movies.length;
            watchlistCount.textContent = watchlist;
            watchedCount.textContent = watched;
+
+           displayMovies(movies);
+    });
+  }
+
+  function displayMovies(movies){
+    if(movies.length===0){
+       moviesList.innerHTML =`
+       <div class ="empty-state">
+       <i class="fas fa-film"></i>
+       <h3> No movies found</h3>
+       <p>Add your first movie to get started</p>
+       </div>
+       `;
+       return;
+    }
+    moviesList.innerHTML='';
+
+    movies.forEach(movie=>{
+      const movieCard = document.createElement('div');
+      movieCard.className= 'movie-card';
+      movieCard.dataset.id=movie.id;
+
+      movieCard.innerHTML=`
+      <div class="Movie-poster" style="background-image: url('${image.posterUrl ||''})">
+          <span class="movie-status ${movie.status}">
+          ${movie.status}
+          </span>
+      
+      </div>
+      `;
     })
   }
   //helping function

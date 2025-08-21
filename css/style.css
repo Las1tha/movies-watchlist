@@ -231,3 +231,14 @@ box-shadow: 0 4px 6px rgba(0, 0, 0, 0.01);
     font-size: 0.9rem;
     color: var(--gray-color);
 }
+
+.empty-state{
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--gray-color);
+}
+.empty-state i{
+    font-size: 3rem;
+    margin-bottom: 20px;
+    opacity: 0.5;   
+}
