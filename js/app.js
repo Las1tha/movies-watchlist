@@ -43,7 +43,25 @@ const firebaseConfig = {
            star.addEventListener('mouseout',handleStarOut);
     });
   }
-  
+
+  //handle form submission
+  function handleFormSubmit(e){
+    e.preventDefault();
+    
+      const title = titleInput.value.trim();
+      const year = yearInput.value;
+      const director = directorInput.value.trim();
+      const genre = genreInput.value;
+      const status = document.querySelector('input[name="status"]:checked').value;
+      const rating = ratingInput.value;
+      const notes = notesInput.value.trim();
+
+      if(!title){
+        alert('Please enter a movie title');
+        return;
+      }
+  }
+
   //star rating functionalities
   function handleStarClick(e){
     const rating = parseInt(e.target.dataset.rating);

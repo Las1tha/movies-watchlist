@@ -108,6 +108,15 @@ header p {
     outline: none;
     border-color: var(--primary-color);
 }
+.rating-stars{
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.rating-stars i.active{
+    color: #ffc107;
+}
+    
 
 .radio-group{
     display: flex;
