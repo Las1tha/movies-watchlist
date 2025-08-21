@@ -38,6 +38,7 @@ const firebaseConfig = {
   //initialize the app
   function init(){
     movieForm.addEventListener('submit',handleFormSubmit);
+    loadMovies();
     
     stars.forEach(star =>{
            star.addEventListener('click',handleStarClick);
@@ -83,6 +84,31 @@ const firebaseConfig = {
     .catch(error=>{
       showAlert('Error in Adding movie'+error.message,'error');
     });
+  }
+
+  function loadMovies(){
+    database.ref('movies').on('value',(snapshot)=>{
+           const movies= [];
+           let watchlist = 0;
+           let watched = 0;
+
+           snapshot.forEach((childSnapshot)=>{
+              const movie = {
+                id:childSnapshot.key,
+              ...childSnapshot.val()
+              };
+              movies.push(movie);
+
+              if(movie.status==='watchlist'){
+                watchlist++;
+              }else if(movie.status==='watched'){
+                watched++;
+              }
+           })
+           totalMovies.textContent = movies.length;
+           watchlistCount.textContent = watchlist;
+           watchedCount.textContent = watched;
+    })
   }
   //helping function
   function showAlert(message, type){
