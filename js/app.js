@@ -35,12 +35,13 @@ const watchedCount = document.getElementById('watchedCount');
 
 const stars = document.querySelectorAll('.rating-stars i');
 
-let isEditing=false;
-let currentMovieId=null;
+let isEditing = false;
+let currentMovieId = null;
 
 //initialize the app
 function init() {
   movieForm.addEventListener('submit', handleFormSubmit);
+  cancelBtn.addEventListener('click', resetForm);
   loadMovies();
 
   stars.forEach(star => {
@@ -78,17 +79,33 @@ function handleFormSubmit(e) {
     updatedAt: firebase.database.ServerValue.TIMESTAMP,
 
   };
+  console.log(isEditing);
+  console.log(currentMovieId);
 
-  database.ref('movies').push(movieData)
-    .then(() => {
-      showAlert('Movie added successfully', 'success');
-      movieForm.reset();
-    })
-    .catch(error => {
-      showAlert('Error in Adding movie' + error.message, 'error');
-    });
+  if (isEditing) {
+    //Update existing movie
+    database.ref(`movies/${currentMovieId}`).update(movieData)
+      .then(() => {
+        showAlert('Movie updated successfully!', 'success');
+        movieForm.reset();
+      })
+      .catch(error => {
+        showAlert('Error updating movie:' + error.message, 'error');
+        resetForm();
+      });
+
+  } else {
+    //Add new movie
+    database.ref('movies').push(movieData)
+      .then(() => {
+        showAlert('Movie added successfully', 'success');
+        movieForm.reset();
+      })
+      .catch(error => {
+        showAlert('Error in Adding movie' + error.message, 'error');
+      });
+  }
 }
-
 function loadMovies() {
   database.ref('movies').on('value', (snapshot) => {
     const movies = [];
@@ -172,51 +189,53 @@ function displayMovies(movies) {
       `;
     moviesList.appendChild(movieCard);
   });
-  document.querySelectorAll('.btn-edit').forEach(btn =>{
-    btn.addEventListener('click',haddleEditMovie);  
-    });
-  document.querySelectorAll('.btn-delete').forEach(btn =>{
-    btn.addEventListener('click',haddleDeleteMovie);  
-    });
-}
-function haddleEditMovie(e){
-  const movieId=e.currentTarget.dataset.id;
-
-  database.ref(`movies/${movieId}`).once('value')
-  .then(snapshot =>{
-        const movie=snapshot.val();
-
-        movieIdInput.value=movieId;
-        titleInput.value=movie.title||'';
-        yearInput.value=movie.year||'';
-        directorInput.value=movie.director||'';
-        genreInput.value=movie.genre||'Action';   
-
-        document.querySelector(`input[name="status"][value="${movie.status}"]`).checked=true;
-        //set rating
-        ratingInput.value = movie.rating|| 0;
-        updateStarRating(movie.rating|| 0);
-
-        notesInput.value=movie.notes||'';
-
-        saveBtn.textContent='Update Movie';
-  })
-  .catch(error =>{
-    showAlert('Error Loading movie :' + error.message, 'error');
+  document.querySelectorAll('.btn-edit').forEach(btn => {
+    btn.addEventListener('click', haddleEditMovie);
+  });
+  document.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', haddleDeleteMovie);
   });
 }
-function haddleDeleteMovie(e){
-  if(!confirm('Are you sure want to delete this movie?')){
+function haddleEditMovie(e) {
+  const movieId = e.currentTarget.dataset.id;
+
+  database.ref(`movies/${movieId}`).once('value')
+    .then(snapshot => {
+      const movie = snapshot.val();
+
+      movieIdInput.value = movieId;
+      titleInput.value = movie.title || '';
+      yearInput.value = movie.year || '';
+      directorInput.value = movie.director || '';
+      genreInput.value = movie.genre || 'Action';
+
+      document.querySelector(`input[name="status"][value="${movie.status}"]`).checked = true;
+      //set rating
+      ratingInput.value = movie.rating || 0;
+      updateStarRating(movie.rating || 0);
+
+      notesInput.value = movie.notes || '';
+
+      saveBtn.textContent = 'Update Movie';
+      isEditing = true;
+      currentMovieId = movieId;
+    })
+    .catch(error => {
+      showAlert('Error Loading movie :' + error.message, 'error');
+    });
+}
+function haddleDeleteMovie(e) {
+  if (!confirm('Are you sure want to delete this movie?')) {
     return;
   }
-  const movieId=e.currentTarget.dataset.id;
-   database.ref(`movies/${movieId}`).remove()
-   .then(() => {
-    showAlert('Movie deleted successfully!', 'success');
-   })
-   .catch(error => {
-    showAlert('Error deleting movie:' + error.message, 'error');
-   });
+  const movieId = e.currentTarget.dataset.id;
+  database.ref(`movies/${movieId}`).remove()
+    .then(() => {
+      showAlert('Movie deleted successfully!', 'success');
+    })
+    .catch(error => {
+      showAlert('Error deleting movie:' + error.message, 'error');
+    });
 }
 
 //helping function
@@ -265,6 +284,15 @@ function updateStarRating(rating) {
       star.classList.add('far');
     }
   });
+}
+
+function resetForm() {
+  movieForm.reset();
+  isEditing = false;
+  currentMovieId = null;
+  saveBtn.textContent = 'Save Movie'
+  ratingInput.value = 0;
+  updateStarRating(0);
 }
 
 document.addEventListener('DOMContentLoaded', init);
