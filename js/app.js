@@ -42,6 +42,9 @@ let currentMovieId = null;
 function init() {
   movieForm.addEventListener('submit', handleFormSubmit);
   cancelBtn.addEventListener('click', resetForm);
+  searchInput.addEventListener('input',filterMovies);
+  filterStatus.addEventListener('change',filterMovies);
+  filterGenre.addEventListener('change',filterMovies);
   loadMovies();
 
   stars.forEach(star => {
@@ -237,6 +240,41 @@ function haddleDeleteMovie(e) {
       showAlert('Error deleting movie:' + error.message, 'error');
     });
 }
+
+function filterMovies() {
+ const searchTerm = searchInput.value.toLowerCase();
+ const statusFilter = filterStatus.value;
+ const genreFilter = filterGenre.value;
+
+ database.ref('movies').once('value')
+ .then(snapshot =>{
+      const movies = [];
+
+      snapshot.forEach(childSnapshot =>{
+         const movie = {
+           id: childSnapshot.key,
+           ...childSnapshot.val()
+         }
+         //apply filter
+         const matchesSearch = movie.title.toLowerCase().includes(searchTerm)||(movie.director 
+        && movie.director.toLowerCase().includes(searchTerm));
+         
+        const matchesStatus = statusFilter === 'all' || movie.status === statusFilter;
+        const matchesGenre = !genreFilter || movie.genre === genreFilter;
+        
+        if(matchesSearch && matchesStatus && matchesGenre){
+          movies.push(movie);
+        }
+
+      });
+   
+      displayMovies(movies);
+ })
+ .catch(error =>{
+  showAlert('Filter error:' + error.message, 'error');
+ });
+ }
+  
 
 //helping function
 function showAlert(message, type) {
