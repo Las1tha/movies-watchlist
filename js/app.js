@@ -35,6 +35,9 @@ const watchedCount = document.getElementById('watchedCount');
 
 const stars = document.querySelectorAll('.rating-stars i');
 
+let isEditing=false;
+let currentMovieId=null;
+
 //initialize the app
 function init() {
   movieForm.addEventListener('submit', handleFormSubmit);
@@ -168,8 +171,54 @@ function displayMovies(movies) {
       </div>
       `;
     moviesList.appendChild(movieCard);
-  })
+  });
+  document.querySelectorAll('.btn-edit').forEach(btn =>{
+    btn.addEventListener('click',haddleEditMovie);  
+    });
+  document.querySelectorAll('.btn-delete').forEach(btn =>{
+    btn.addEventListener('click',haddleDeleteMovie);  
+    });
 }
+function haddleEditMovie(e){
+  const movieId=e.currentTarget.dataset.id;
+
+  database.ref(`movies/${movieId}`).once('value')
+  .then(snapshot =>{
+        const movie=snapshot.val();
+
+        movieIdInput.value=movieId;
+        titleInput.value=movie.title||'';
+        yearInput.value=movie.year||'';
+        directorInput.value=movie.director||'';
+        genreInput.value=movie.genre||'Action';   
+
+        document.querySelector(`input[name="status"][value="${movie.status}"]`).checked=true;
+        //set rating
+        ratingInput.value = movie.rating|| 0;
+        updateStarRating(movie.rating|| 0);
+
+        notesInput.value=movie.notes||'';
+
+        saveBtn.textContent='Update Movie';
+  })
+  .catch(error =>{
+    showAlert('Error Loading movie :' + error.message, 'error');
+  });
+}
+function haddleDeleteMovie(e){
+  if(!confirm('Are you sure want to delete this movie?')){
+    return;
+  }
+  const movieId=e.currentTarget.dataset.id;
+   database.ref(`movies/${movieId}`).remove()
+   .then(() => {
+    showAlert('Movie deleted successfully!', 'success');
+   })
+   .catch(error => {
+    showAlert('Error deleting movie:' + error.message, 'error');
+   });
+}
+
 //helping function
 function showAlert(message, type) {
   alert(`${type.toUpperCase()}: ${message}`)
