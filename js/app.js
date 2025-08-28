@@ -131,14 +131,43 @@ const firebaseConfig = {
       movieCard.className= 'movie-card';
       movieCard.dataset.id=movie.id;
 
+    // create star rating list
+      let starHtml = '';
+      for(let i=1;i<=5;i++){
+        if(i<=movie.rating){
+          starHtml += '<i class="fas fa-star"></i>';
+        }else{
+          starHtml +='<i class="far fa-star"></i>';
+        }
+      }
+    
+
       movieCard.innerHTML=`
-      <div class="Movie-poster" style="background-image: url('${image.posterUrl ||''})">
+      <div class="Movie-poster" style="background-image: url('../assets/poster.jpg')">
           <span class="movie-status ${movie.status}">
           ${movie.status}
           </span>
       
       </div>
+      <div class="movie-info">
+      <h3 class="movie-title">${movie.title}</h3>
+      <div class="movie-meta">
+      <span>${movie.year}</span>
+      <span>${movie.genre}</span>
+      </div>
+      <div class = "movie-rating">${starHtml}</div>
+      ${movie.notes ? `<p class="movie-notes">${movie.notes}</p>` : ''}
+      </div>
+      <div class="movie-actions">
+       <button class="btn-edit" data-id="${movie.id}">
+        <i class="fas fa-edit"></i>
+       </button>
+       <button class="btn-delete" data-id="${movie.id}">
+        <i class="fas fa-trash"></i>
+       </button>
+      </div>
       `;
+      moviesList.appendChild(movieCard);
     })
   }
   //helping function
