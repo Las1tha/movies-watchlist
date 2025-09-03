@@ -32,11 +32,18 @@ const moviesList = document.getElementById('moviesList');
 const totalMovies = document.getElementById('totalMovies');
 const watchlistCount = document.getElementById('watchlistCount');
 const watchedCount = document.getElementById('watchedCount');
+const posterPathInput = document.getElementById('posterPath');
 
 const stars = document.querySelectorAll('.rating-stars i');
 
 let isEditing = false;
 let currentMovieId = null;
+
+// generate poster path from movie title
+function generatePosterPath(title) {
+  // Just use the title directly with the path
+  return `assets/posters/${title}.jpg`;
+}
 
 //initialize the app
 function init() {
@@ -46,6 +53,15 @@ function init() {
   filterStatus.addEventListener('change',filterMovies);
   filterGenre.addEventListener('change',filterMovies);
   loadMovies();
+
+
+  //set poster path
+  titleInput.addEventListener('change', function() {
+    const title = titleInput.value.trim();
+    if (title) {
+      posterPathInput.value = generatePosterPath(title);
+    }
+  });
 
   stars.forEach(star => {
     star.addEventListener('click', handleStarClick);
@@ -70,6 +86,12 @@ function handleFormSubmit(e) {
     alert('Please enter a movie title');
     return;
   }
+//Generate poster path if not already set
+  let posterPath = posterPathInput.value;
+  if (!posterPath) {
+    posterPath = generatePosterPath(title);
+  }
+
   const movieData = {
     title,
     year: year || null,
@@ -78,6 +100,7 @@ function handleFormSubmit(e) {
     status,
     rating: rating ? parseInt(rating) : 0,
     notes: notes || null,
+    posterPath:posterPath,
     createdAt: firebase.database.ServerValue.TIMESTAMP,
     updatedAt: firebase.database.ServerValue.TIMESTAMP,
 
@@ -166,7 +189,7 @@ function displayMovies(movies) {
 
 
     movieCard.innerHTML = `
-      <div class="movie-poster" style="background-image: url('../assets/poster.jpg')">
+      <div class="movie-poster" style="background-image: url('${movie.posterPath}')">
           <span class="movie-status ${movie.status}">
           ${movie.status}
           </span>
@@ -211,6 +234,7 @@ function haddleEditMovie(e) {
       yearInput.value = movie.year || '';
       directorInput.value = movie.director || '';
       genreInput.value = movie.genre || 'Action';
+      posterPathInput.value = movie.posterPath || '';
 
       document.querySelector(`input[name="status"][value="${movie.status}"]`).checked = true;
       //set rating
